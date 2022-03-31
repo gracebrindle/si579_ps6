@@ -1,20 +1,19 @@
-import './App.css';
-import WordEntry from "./components/WordEntry";
+import logo from "./logo.svg";
+import "./App.css";
 import InputGroup from "./components/InputGroup";
-import React, { useState, useEffect } from 'react';
+import ShowRhymes from "./components/ShowRhymes";
+import ShowSynonyms from "./components/ShowSynonyms";
+import React, { useState } from "react";
 
-function App() {
-    const defaultWords = [
-        {
-            word: 'laundry',
-            syllables: 2,
-        },
-        {
-            word: 'grace',
-            syllables: 1,
-        }];
-
-    const [words, setWords] = useState(defaultWords);
+const App = (props) => {
+    // Define state variables
+    const [inputValue, setInputValue] = useState("");
+    const [savedWordsArray, setSavedWordsArray] = useState([]);
+    const [dataMuseResults, setDataMuseResults] = useState([]);
+    const [resultsDescription, setResultsDescription] = useState("");
+    const [loadingMessage, setLoadingMessage] = useState("");
+    const [isRhyme, setIsRhyme] = useState(false)
+    const [noResults, setNoResults] = useState(false)
 
 return (
       <main className="container">
@@ -22,26 +21,42 @@ return (
         <h2>YOUR GITHUB CODE LINK GOES HERE</h2>
 
         <div className="row">
-          <div className="col">Saved words: <span></span></div>
+            <div className="col">Saved words: <span>{savedWordsArray.join(',')}</span></div>
         </div>
-
-        < InputGroup />
-
-          <div className = "results">
-              <div className="row">
-                  <h2 className="col" id="output_description">Words that Rhyme With: </h2>
-              </div>
-              <div className="output row">
-                  <output id="word_output" className="col">
-                      <ul className="row">
-                          {/*{defaultWords.map((item) =>*/}
-                          {/*    <RhymeFinder word={item.word} syllables={item.syllables} />*/}
-                          {/*)}*/}
-                      </ul>
-                  </output>
-              </div>
-          </div>
-      </main>);
-};
+        <div className="row">
+            {/*// Pass state variables as props to InputGroup component*/}
+            <InputGroup
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                dataMuseResults={dataMuseResults}
+                setDataMuseResults={setDataMuseResults}
+                resultsDescription={resultsDescription}
+                setResultsDescription={setResultsDescription}
+                loadingMessage={loadingMessage}
+                setLoadingMessage={setLoadingMessage}
+                isRhyme={isRhyme}
+                setIsRhyme={setIsRhyme}
+            />
+        </div>
+        <div className="row">
+            {/*// Describe whether results are rhymes or syllables and what the word input is*/}
+            <h2 className="col">
+                {resultsDescription}
+            </h2>
+        </div>
+        <div className="output row">
+            {/*// Display word results*/}
+            <p>{loadingMessage}</p>
+            {noResults ? "(no results)": ""}
+            {isRhyme ? <ShowRhymes
+                    dataMuseResults={dataMuseResults}
+                    noResults={noResults}
+                    setNoResults={setNoResults}/>:
+                <ShowSynonyms dataMuseResults={dataMuseResults}
+                              noResults={noResults}
+                              setNoResults={setNoResults}/>}
+        </div>
+    </main>
+)};
 
 export default App;

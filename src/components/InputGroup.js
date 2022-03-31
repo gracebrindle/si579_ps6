@@ -1,63 +1,86 @@
 import React from "react";
-import ShowRhymes from "./components/WordEntry";
-import { useState, useEffect, useRef } from "react";
 
 const InputGroup = (props) => {
-    const [words, setWords] = useState([]);
-    const inputRef = useRef();
+    // Define props that were passed in through App
+    const {
+        inputValue,
+        setInputValue,
+        setResultsDescription,
+        setDataMuseResults,
+        loadingMessage,
+        setLoadingMessage,
+        isRhyme,
+        setIsRhyme,
+    } = props;
 
-    // Retrieve the proper URL based on whether the search is for a rhyme or a similar word
-    function getDatamuseUrl(type, wordInput) {
-        if (type === "rhyme") {
-            let url = `https://api.datamuse.com/words?${(new URLSearchParams({'rel_rhy': wordInput.value})).toString()}`;
-        }
-        else {
-            let url = `https://api.datamuse.com/words?${(new URLSearchParams({'ml': wordInput.value})).toString()}`
-        }
-    }
 
-    // Fetch the data from the API and store the results in the words array
-    useEffect((url) => {
-        fetch(url)
+    // Fetch rhymes from Datamuse using the word input
+    const ShowRhymes = () => {
+        // Set the loading message
+        setLoadingMessage("loading...")
+        fetch(
+            // Adjust API URL to include the inputValue
+            `https://api.datamuse.com/words?${new URLSearchParams({
+                rel_rhy: inputValue,
+            }).toString()}`
+        )
             .then((response) => response.json())
-            .then((json) => setWords(Object.values(json)));
-    }, []);
+            .then((json) => {
+                // CLear the loading message
+                setLoadingMessage("");
+                // Store the data in DataMuseResults
+                setDataMuseResults(json);
+                // Set the results header
+                setResultsDescription(`Words that rhyme with ${inputValue}`);
+            });
+        setIsRhyme(true)
+    };
 
-    const ShowRhymes = (wordInput) => {
-        getDatamuseUrl(wordInput)
+    // Fetch syllables from Datamuse using the word input
+    const ShowSynonyms = () => {
+        // Set the loading message
+        setLoadingMessage("loading...")
+        fetch(
+            `https://api.datamuse.com/words?${new URLSearchParams({
+                ml: inputValue,
+            }).toString()}`
+        )
+            .then((response) => response.json())
+            .then((json) => {
+                // Clear the loading message
+                setLoadingMessage("");
+                // Store the data in DataMuseResults
+                setDataMuseResults(json);
+                // Set the results header
+                setResultsDescription(`Words with a meaning similar to ${inputValue}`);
+            });
+        setIsRhyme(false)
+    };
 
-    }
-
-    // Add keyboard functionality so it runs the program when 'enter' is pressed
+    // Call ShowRhymes() when 'enter' is pressed
     const keyDownHandler = (e) => {
         if (e.key === 'Enter') {
             ShowRhymes()
         }
     }
 
-    return(
-        <div className="row">
+    return (
         <div className="input-group col">
             <input
-                ref={inputRef}
+                onKeyDown={keyDownHandler}
                 className="form-control"
+                value={inputValue}
+                 // Set the value of the InputValue when the input is changed
+                onChange={(event) => setInputValue(event.target.value)}
                 type="text"
-                placeholder="Enter a word"/>
-
-            <button
-                type="button"
-                className="btn btn-primary"
-                // How do I pass the word input into the WordEntry function?
-                onClick={ShowRhymes}>Show rhyming words
-            </button>
-
-            <button>
-                type="button"
-                className="btn btn-secondary"
-                    Show synonyms
-            </button>
+                placeholder="Enter a word"
+            />
+            {/*// Call ShowRhymes when clicked*/}
+            <button onClick={ShowRhymes}>Show rhyming words</button>
+            {/*// Call ShowSynonyms when clicked*/}
+            <button onClick={ShowSynonyms}>Show synonyms</button>
         </div>
-    </div>)
-
+    );
 };
+
 export default InputGroup
